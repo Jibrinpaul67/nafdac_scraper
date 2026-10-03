@@ -30,7 +30,7 @@ params = {
     "columns[3][name]": "product_category_id",
     "columns[3][searchable]": "true",
     "columns[3][orderable]": "true",
-    "columns[3][search][value]": "",
+    "columns[3][search][value]": " ",
     "columns[3][search][regex]": "false",
 
     "columns[5][data]": "NAFDAC",
@@ -64,6 +64,7 @@ params = {
     "order[0][column]": "0",
     "order[0][dir]": "asc",
 
+    # Pagination
     "start": 100,
     "length": 100,
 
@@ -78,6 +79,7 @@ headers = {
     "User-Agent": "Mozilla/5.0",
 }
 
+# Make ONE request
 response = requests.get(
     url,
     params=params,
@@ -86,14 +88,22 @@ response = requests.get(
 )
 
 print("Status:", response.status_code)
-print("URL:", response.url)
 
-# print(response.text[:2000])
+response.raise_for_status()
+
 data = response.json()
+
+
+print("Total:", data["recordsTotal"])
+print("Filtered:", data["recordsFiltered"])
+print("Returned:", len(data["data"]))
+
+
 
 categories = {}
 
 for product in data["data"]:
+
     category = product.get("product_category")
 
     if category:
@@ -102,55 +112,25 @@ for product in data["data"]:
 
         categories[category_id] = category_name
 
+
 print("\nCategories found:")
+
 for category_id, category_name in categories.items():
     print(category_id, "=", category_name)
 
-print("Total:", data["recordsTotal"])
-print("Filtered:", data["recordsFiltered"])
-print("Returned:", len(data["data"]))
 
-for product in data["data"]:
-    print(
-        product["product_id"],
-        product["product_name"],
-        product["NAFDAC"],
-        product["status"]
-    )
-    data = response.json()
-
-print("Total:", data["recordsTotal"])
-print("Filtered:", data["recordsFiltered"])
-print("Returned:", len(data["data"]))
-
-for product in data["data"]:
-    print(
-        product["product_id"],
-        "|",
-        product["product_name"],
-        "|",
-        product["NAFDAC"],
-        "|",
-        product["status"]
-    )
-
-    response = requests.get(url, params=params, headers=headers)
-
-print("Status:", response.status_code)
-
-data = response.json()
-
-print("Total:", data["recordsTotal"])
-print("Filtered:", data["recordsFiltered"])
-print("Returned:", len(data["data"]))
+print("\nProducts:")
 
 for product in data["data"][:10]:
+
     print(
         product["product_id"],
         "|",
         product["product_name"],
         "|",
         product.get("NAFDAC"),
+        "|",
+        product.get("status"),
         "|",
         product.get("product_category", {}).get("name")
     )
